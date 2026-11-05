@@ -2,6 +2,6 @@
 .vscode/
 __pycache__/
 ui/
-vector.db/
-правки_от_дани.txt/
-.DS_Store/
+vector.db
+правки.txt
+.DS_Store

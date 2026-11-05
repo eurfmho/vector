@@ -70,12 +70,11 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             if not self.is_ended:
-                cursor.execute('INSERT INTO timer(user, status, time) VALUES(?, ?,?)', (self.user_id, 1, self.current_seconds))
+                cursor.execute('INSERT INTO timer(user, status, time, task) VALUES(?, ?,?, (SELECT id FROM tasks WHERE task = ?))', (self.user_id, 1, self.total_duration, self.task))
                 show_custom_message(
                     self, "Достижение", "Вы дошли до конца, молодцы!")
             else:
-                cursor.execute('INSERT INTO timer(user, status, time) VALUES(?, ?,?)', (self.user_id, 0, self.current_seconds))
+                cursor.execute('INSERT INTO timer(user, status, time, task) VALUES(?, ?,?, (SELECT id FROM tasks WHERE task = ?))', (self.user_id, 0, self.current_seconds, self.task))
                 show_custom_message(
                     self, "Попытка", "Вы попытались, молодцы!")
             conn.commit()
-

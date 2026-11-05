@@ -26,7 +26,9 @@ def full_fill_bd():
         user INTEGER NOT NULL,
         status INTEGER,
         time INTEGER NOT NULL,
+        task INTEGER NOT NULL,
         FOREIGN KEY (user) REFERENCES profiles(id)
+        FOREIGN KEY (task) REFERENCES profiles(tasks)
     );
     """
     )
@@ -38,7 +40,9 @@ def full_fill_bd():
         user INTEGER NOT NULL,
         status INTEGER,
         time INTEGER NOT NULL,
+        task INTEGER NOT NULL,
         FOREIGN KEY (user) REFERENCES profiles(id)
+        FOREIGN KEY (task) REFERENCES profiles(tasks)
     );
     """
     )
@@ -53,7 +57,9 @@ def full_fill_bd():
         work_time INTEGER NOT NULL,
         rest_time INTEGER NOT NULL,
         amount_of_sessions INTEGER NOT NULL,
+        task INTEGER NOT NULL,
         FOREIGN KEY (user) REFERENCES profiles(id)
+        FOREIGN KEY (task) REFERENCES profiles(tasks)
     );
     """
     )

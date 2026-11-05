@@ -18,6 +18,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
         self.work_on_task_time = 0
         self.rest_time = 0
         self.amount_sessions = 0
+        self.task = str()
 
         self.is_running = False
         self.pomodoro_thread = None
@@ -55,7 +56,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             with sqlite3.connect(DB_PATH) as con:
                 cur = con.cursor()
                 cur.execute('''INSERT INTO pomodoro(user, status, work_time, 
-                rest_time, amount of sessions, time) VALUES(?, ?, ?, ?, ?, ?)''', (self.user_id, 0, self.work_on_task_time, self.rest_time, self.amount_sessions, self.worked_sekonds))
+                rest_time, amount of sessions, time, task) VALUES(?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ?))''', (self.user_id, 0, self.work_on_task_time, self.rest_time, self.amount_sessions, self.worked_sekonds, self.task))
                 con.commit()
 
     def update_label(self, seconds_left, is_work):

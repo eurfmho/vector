@@ -19,6 +19,8 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
             show_custom_message(self, "Ошибка", "создайте аккаунт или авторизуйтесь")
         self.current_seconds = 0 
         self.seconds_left = 0
+        self.task = str()
+
         self.is_running = True  
         self.is_started = False
         self.timer_thread = None 
@@ -41,8 +43,8 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
             self.watch_thread.finished.connect(self.on_finished)
             self.watch_thread.start()
         else:
-            self.update_label(0)
             self.watch_thread.stop()
+            self.update_label(0)
 
     def update_label(self, number):
         self.current_seconds = number
@@ -67,8 +69,6 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
                 self, "Попытка", "Вы попытались, молодцы!")
         with sqlite3.connect(DB_PATH) as con:
             cursor = con.cursor()
-            cursor.execute("INSERT INTO stopwatch(user, status, time) VALUES(?, ?, ?)", (self.user_id, int(self.goal_achieved), self.current_seconds))
+            cursor.execute("INSERT INTO stopwatch(user, status, time, task) VALUES(?, ?, ?, (SELECT id FROM tasks WHERE task = ?))", (self.user_id, int(self.goal_achieved), self.current_seconds, self.task))
             con.commit()
         self.current_seconds = 0
-
-
