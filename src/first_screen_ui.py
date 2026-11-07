@@ -54,6 +54,10 @@ class Ui_hihihi(object):
         self.tab_3.addTab(self.tab_menu, "")
         self.tab_settings = QtWidgets.QWidget()
         self.tab_settings.setObjectName("tab_settings")
+        self.tab_statistics = QtWidgets.QWidget()
+        self.tab_statistics.setObjectName("tab_statistics")
+                
+        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(parent=self.tab_statistics)
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(parent=self.tab_settings)
         self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(9, 19, 781, 81))
         self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
@@ -100,6 +104,7 @@ class Ui_hihihi(object):
         self.create_account_button.setFont(font)
         self.create_account_button.setObjectName("create_account_button")
         self.tab_3.addTab(self.tab_settings, "")
+        self.tab_3.addTab(self.tab_statistics, "")
 
         self.retranslateUi(hihihi)
         self.tab_3.setCurrentIndex(0)
@@ -119,3 +124,5 @@ class Ui_hihihi(object):
         self.blue_theme.setText(_translate("hihihi", "angelic blue"))
         self.create_account_button.setText(_translate("hihihi", "авторизация/\nрегистрация"))
         self.tab_3.setTabText(self.tab_3.indexOf(self.tab_settings), _translate("hihihi", "settings"))
+        self.tab_3.setTabText(self.tab_3.indexOf(self.tab_statistics), _translate("hihihi", "statistics"))
+

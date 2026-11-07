@@ -43,6 +43,10 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
             self.timer_thread.start()
             
         else:
+            if self.timer_thread and self.timer_thread.isRunning():
+                self.is_ended = True
+                self.timer_thread.stop()
+                return 
             self.timer_thread.stop()
             self.is_ended = True
             self.update_label(0)
@@ -54,9 +58,7 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
             self.lcd_hours.display(0)
             self.lcd_min.display(0)
             self.lcd_sek.display(0)
-            self.is_started = not self.is_started
-            self.timer_thread.stop()
-
+            self.is_started = False
         else:
             m = (self.seconds_left // 60) % 60
             self.lcd_min.display(m)
