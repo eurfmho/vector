@@ -1,14 +1,14 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
-from .pomodoro.pomodoro import PomodoroWindow
-from .timer.timer import TimerScreen
-from .first_screen_ui import Ui_hihihi
-from .stopwatch.stopwatch import StopwatchWindow
-from .exceptions.exceptions import InvalidNameException, EmptyNameSpace
-from .scripts.custom_messagebox import show_custom_message
-from .fill_db import full_fill_bd, DB_PATH
+from src.pomodoro.pomodoro import PomodoroWindow
+from src.timer.timer import TimerScreen
+from src.first_screen_ui import Ui_hihihi
+from src.stopwatch.stopwatch import StopwatchWindow
+from src.exceptions.exceptions import InvalidNameException, EmptyNameSpace
+from src.scripts.custom_messagebox import show_custom_message
+from src.fill_db import full_fill_bd, DB_PATH
 import sqlite3
-from .statistics.statistics import load_data
+from src.statistics.statistics import load_data
 
 
 BLUE_THEME = """

@@ -32,8 +32,9 @@ def get_date_filter_sql(parent):
     return start_date.strftime("%Y-%m-%d %H:%M:%S")
 
 def load_data(parent, user_id):
-    add_items()
-    update_pie_chart(user_id)
+    parent.pie_chart_view = parent.create_pie_chart()
+    add_items(parent, user_id)
+    update_pie_chart(parent, user_id)
     update_line_chart(parent, user_id)
 
 def get_time_statistics(user_id):
