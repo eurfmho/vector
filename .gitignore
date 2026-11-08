@@ -1,8 +1,0 @@
-.venv/
-.vscode/
-__pycache__/
-ui/
-правки.txt
-.gitignore
-vector.db
-.DS_Store
