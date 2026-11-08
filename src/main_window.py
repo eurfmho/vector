@@ -8,6 +8,7 @@ from .exceptions.exceptions import InvalidNameException, EmptyNameSpace
 from .scripts.custom_messagebox import show_custom_message
 from .fill_db import full_fill_bd, DB_PATH
 import sqlite3
+from .statistics.statistics import load_data
 
 
 BLUE_THEME = """
@@ -58,10 +59,17 @@ class FirstWindow(QMainWindow, Ui_hihihi):
         self.timer_button.clicked.connect(self.open_timer_window)
         self.stopwatch_button.clicked.connect(self.open_stopwatch_window)
         self.pomodoro_button.clicked.connect(self.open_pomodoro_window)
-        self.create_account_button.clicked.connect(self.create_account)
+        self.create_account_btn.clicked.connect(self.create_account)
         self.basic_theme.setChecked(True)
         self.basic_theme.toggled.connect(self.apply_theme)
         self.blue_theme.toggled.connect(self.apply_theme)
+        self.generate_btn.connect(self.beta_load_data)
+
+    def beta_load_data(self):
+        try:
+            load_data(self, self.current_user)
+        except Exception:
+            show_custom_message(self, "Ошибка", "Что-то пошло не так,извините")
 
     def open_timer_window(self):
         try:

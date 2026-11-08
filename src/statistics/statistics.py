@@ -31,10 +31,10 @@ def get_date_filter_sql(parent):
         start_date = datetime(2000, 1, 1)
     return start_date.strftime("%Y-%m-%d %H:%M:%S")
 
-def load_data(self, user_id):
+def load_data(parent, user_id):
     add_items()
     update_pie_chart(user_id)
-    update_line_chart()
+    update_line_chart(parent, user_id)
 
 import sqlite3
 
@@ -74,9 +74,37 @@ def get_time_statistics(user_id):
     conn.close()
     return stats
 
+def get_filtered_progress_for_task(parent, user_id, task_id) -> list:
+    start_date_str = get_date_filter_sql(parent)
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT sub.date, SUM(sub.time) as total_time
+        FROM (
+            SELECT time, date FROM timer WHERE user = ? AND task = ? AND date >= ?
+            UNION ALL
+            SELECT time, date FROM stopwatch WHERE user = ? AND task = ? AND date >= ?
+            UNION ALL
+            SELECT time, date FROM pomodoro WHERE user = ? AND task = ? AND date >= ?
+        ) AS sub
+        GROUP BY sub.date
+        ORDER BY sub.date ASC;
+    """
+    
+    cursor.execute(query, (
+        user_id, task_id, start_date_str, 
+        user_id, task_id, start_date_str, 
+        user_id, task_id, start_date_str
+    ))
+    rows = cursor.fetchall()
+    
+    conn.close()
+    
+    return rows
+
 def update_pie_chart(parent, user_id):
     parent.pie_series.clear()
-    start_date = get_date_filter_sql()
 
     try:
         data = get_time_statistics(user_id)
@@ -87,44 +115,34 @@ def update_pie_chart(parent, user_id):
 
     except Exception as e:
         show_custom_message(parent, "Ошибка", "Ошибка генераци диаграммы,\nубедитесь,что вы запускали программу")
+        return
 
 def update_line_chart(parent, user_id):
     parent.line_series.clear()
     selected_task = parent.combo_task_stat.currentText()
+    with sqlite3.connect(DB_PATH) as con:
+        cur = con.cursor()
+        task_id = cur.execute('SELEST id FROM tasks WHERE task = ?', (selected_task, ))
     if not selected_task:
         show_custom_message(parent, "Ошибка", "выберите задачу")
 
-    start_date = get_date_filter_sql()
-
     try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        query = """
-            SELECT DATE(timestamp) as session_date, SUM(duration) 
-            FROM sessions 
-            WHERE user_id = ? AND task_name = ? AND timestamp >= ? 
-            GROUP BY session_date 
-            ORDER BY session_date ASC
-        """
-        cursor.execute(query, (parent.user_id, selected_task, start_date))
-        data = cursor.fetchall()
-        conn.close()
+        data = get_filtered_progress_for_task(parent, user_id, task_id)
 
-        # Добавляем точки на линейный график (в качестве оси X используем порядковые индексы или даты)
         parent.line_chart.removeSeries(parent.line_series)
         parent.line_series = QLineSeries()
         parent.line_series.setName(selected_task)
 
-        for index, (date_str, duration) in enumerate(data):
-            self.line_series.append(index, duration)
+        for day_session, duration in data:
+            parent.line_series.append(day_session, duration)
 
-        self.line_chart.addSeries(self.line_series)
-        self.line_chart.createDefaultAxes()
-        self.line_chart.setTitle(f"Динамика прогресса: {selected_task}")
+        parent.line_chart.addSeries(parent.line_series)
+        parent.line_chart.createDefaultAxes()
+        parent.line_chart.setTitle(f"Динамика прогресса: {selected_task}")
 
-    except Exception as e:
-        print(f"Ошибка обновления линейного графика: {e}")
-
+    except Exception:
+        show_custom_message(parent, "Ошибка", "Произошла ошибка при генерации графика,\nпроверьте наличие сессий приложения")
+        return 
 
 
 
