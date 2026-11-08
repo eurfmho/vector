@@ -8,6 +8,7 @@ from ..scripts.add_tasks import add_items
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
+import datetime as dt
 
 
 class PomodoroWindow(QMainWindow, Ui_pomodoro):
@@ -56,7 +57,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             with sqlite3.connect(DB_PATH) as con:
                 cur = con.cursor()
                 cur.execute('''INSERT INTO pomodoro(user, status, work_time, 
-                rest_time, amount of sessions, time, task) VALUES(?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ?))''', (self.user_id, 0, self.work_on_task_time, self.rest_time, self.amount_sessions, self.worked_sekonds, self.task))
+                rest_time, amount of sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?,?, (SELECT id FROM tasks WHERE task = ?))''', (self.user_id, 0, self.work_on_task_time, self.rest_time, self.amount_sessions, self.worked_sekonds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
                 con.commit()
 
     def update_label(self, seconds_left, is_work):
@@ -85,7 +86,8 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
             cur.execute('''INSERT INTO pomodoro(user, status, work_time, 
-            rest_time, amount_of_sessions, time) VALUES(?, ?, ?, ?, ?, ?)''', (self.user_id, 1, self.work_on_task_time, self.rest_time, self.amount_sessions, self.work_on_task_time * self.amount_sessions))
+            rest_time, amount_of_sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ?)
+            )''', (self.user_id, 1, self.work_on_task_time, self.rest_time, self.amount_sessions, self.work_on_task_time * self.amount_sessions, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
             con.commit()
 
     def get_inserted_time(self):

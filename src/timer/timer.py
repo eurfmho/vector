@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QMainWindow
 from ..scripts.get_all_values import get_all_values
 from ..fill_db import DB_PATH
 import sqlite3
+import datetime as dt
 
 
 class TimerScreen(QMainWindow, Ui_timer_screen):
@@ -72,7 +73,7 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             if not self.is_ended:
-                cursor.execute('INSERT INTO timer(user, status, time, task) VALUES(?, ?,?, (SELECT id FROM tasks WHERE task = ?))', (self.user_id, 1, self.total_duration, self.task))
+                cursor.execute('INSERT INTO timer(user, status, time, date,task) VALUES(?, ?,?, ,(SELECT id FROM tasks WHERE task = ?))', (self.user_id, 1, self.total_duration, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
                 show_custom_message(
                     self, "Достижение", "Вы дошли до конца, молодцы!")
             else:

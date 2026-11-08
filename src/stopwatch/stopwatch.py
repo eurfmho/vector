@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QMainWindow
 from ..scripts.get_all_values import get_all_values
 from ..fill_db import DB_PATH
 import sqlite3
-
+import datetime as dt
 
 class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
     def __init__(self, user_id):
@@ -69,6 +69,6 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
                 self, "Попытка", "Вы попытались, молодцы!")
         with sqlite3.connect(DB_PATH) as con:
             cursor = con.cursor()
-            cursor.execute("INSERT INTO stopwatch(user, status, time, task) VALUES(?, ?, ?, (SELECT id FROM tasks WHERE task = ?))", (self.user_id, int(self.goal_achieved), self.current_seconds, self.task))
+            cursor.execute("INSERT INTO stopwatch(user, status, time, date, task) VALUES(?, ?, ?, ?,(SELECT id FROM tasks WHERE task = ?))", (self.user_id, int(self.goal_achieved), self.current_seconds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
             con.commit()
         self.current_seconds = 0
