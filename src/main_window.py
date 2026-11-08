@@ -63,7 +63,7 @@ class FirstWindow(QMainWindow, Ui_hihihi):
         self.basic_theme.setChecked(True)
         self.basic_theme.toggled.connect(self.apply_theme)
         self.blue_theme.toggled.connect(self.apply_theme)
-        self.generate_btn.connect(self.beta_load_data)
+        self.generate_btn.clicked.connect(self.beta_load_data)
 
     def beta_load_data(self):
         try:

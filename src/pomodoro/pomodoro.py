@@ -8,7 +8,7 @@ from ..scripts.add_tasks import add_items
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
-import datetime as dt
+from datetime import datetime as dt
 
 
 class PomodoroWindow(QMainWindow, Ui_pomodoro):

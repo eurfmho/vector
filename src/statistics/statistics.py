@@ -36,8 +36,6 @@ def load_data(parent, user_id):
     update_pie_chart(user_id)
     update_line_chart(parent, user_id)
 
-import sqlite3
-
 def get_time_statistics(user_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -103,7 +101,7 @@ def get_filtered_progress_for_task(parent, user_id, task_id) -> list:
     
     return rows
 
-def update_pie_chart(parent, user_id):
+def update_pie_chart(parent, user_id):         
     parent.pie_series.clear()
 
     try:
@@ -113,7 +111,7 @@ def update_pie_chart(parent, user_id):
             if duration:
                 parent.pie_series.append(counter_type, duration)
 
-    except Exception as e:
+    except Exception:
         show_custom_message(parent, "Ошибка", "Ошибка генераци диаграммы,\nубедитесь,что вы запускали программу")
         return
 

@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QMainWindow
 from ..scripts.get_all_values import get_all_values
 from ..fill_db import DB_PATH
 import sqlite3
-import datetime as dt
+from datetime import datetime as dt
 
 class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
     def __init__(self, user_id):
