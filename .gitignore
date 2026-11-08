@@ -1,0 +1,7 @@
+.venv/
+.vscode/
+__pycache__/
+ui/
+правки.txt
+vector.db
+.DS_Store

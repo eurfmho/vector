@@ -8,7 +8,7 @@ from src.exceptions.exceptions import InvalidNameException, EmptyNameSpace
 from src.scripts.custom_messagebox import show_custom_message
 from src.fill_db import full_fill_bd, DB_PATH
 import sqlite3
-from src.statistics.statistics import load_data
+from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
 
 
 BLUE_THEME = """
@@ -54,6 +54,7 @@ class FirstWindow(QMainWindow, Ui_hihihi):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        setup_charts(self)
         full_fill_bd()
 
         self.timer_button.clicked.connect(self.open_timer_window)
@@ -104,6 +105,7 @@ class FirstWindow(QMainWindow, Ui_hihihi):
                 
             self.username_edit.setReadOnly(True)
             self.check_account(us)
+            refresh_task_combo(self, self.current_user)
             
         except InvalidNameException:
             QMessageBox.critical(self, 'Ошибка', 'Имя слишком длинное!')
@@ -115,7 +117,7 @@ class FirstWindow(QMainWindow, Ui_hihihi):
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
             if app:
-                if cur.execute('SELECT theme FROM profiles WHERE name = ?', (self.username_edit.text(), )).fetchone()[0][0] == "blue" or self.blue_theme.isChecked():
+                if self.blue_theme.isChecked():
                     app.setStyleSheet(BLUE_THEME)
                     cur.execute("UPDATE profiles SET theme = 'blue' WHERE name = ?", (self.username_edit.text(), ))
                     con.commit()

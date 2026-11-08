@@ -52,7 +52,7 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
         self.lcd_min.display(m)
         s = self.current_seconds % 60
         self.lcd_sek.display(s)
-        h = self.seconds_left // 3600
+        h = self.current_seconds // 3600
         self.lcd_hours.display(h)
 
         if self.current_seconds == self.seconds_left:
@@ -69,6 +69,6 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
                 self, "Попытка", "Вы попытались, молодцы!")
         with sqlite3.connect(DB_PATH) as con:
             cursor = con.cursor()
-            cursor.execute("INSERT INTO stopwatch(user, status, time, date, task) VALUES(?, ?, ?, ?,(SELECT id FROM tasks WHERE task = ?))", (self.user_id, int(self.goal_achieved), self.current_seconds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
+            cursor.execute("INSERT INTO stopwatch(user, status, time, date, task) VALUES(?, ?, ?, ?,(SELECT id FROM tasks WHERE task = ? AND user = ?))", (self.user_id, int(self.goal_achieved), self.watch_thread.current_seconds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
             con.commit()
         self.current_seconds = 0

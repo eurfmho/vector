@@ -4,7 +4,7 @@ from ..fill_db import DB_PATH
 from ..scripts.custom_messagebox import show_custom_message
 from .thread import PomodoroThread
 from ..scripts.now_time import time
-from ..scripts.add_tasks import add_items
+from ..scripts.add_tasks import add_items, save_task
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
@@ -38,6 +38,8 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             seconds_rest = self.rest_time * 60
 
             self.is_running = True
+            self.worked_sekonds = 0
+            save_task(self.user_id, self.task)
             
             self.pomodoro_thread = PomodoroThread(seconds_work, seconds_rest, self.amount_sessions)
             self.pomodoro_thread.tick.connect(self.update_label)
@@ -57,11 +59,12 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             with sqlite3.connect(DB_PATH) as con:
                 cur = con.cursor()
                 cur.execute('''INSERT INTO pomodoro(user, status, work_time, 
-                rest_time, amount of sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?,?, (SELECT id FROM tasks WHERE task = ?))''', (self.user_id, 0, self.work_on_task_time, self.rest_time, self.amount_sessions, self.worked_sekonds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
+                rest_time, amount_of_sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?,?, (SELECT id FROM tasks WHERE task = ? AND user = ?))''', (self.user_id, 0, self.work_on_task_time, self.rest_time, self.amount_sessions, self.worked_sekonds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
                 con.commit()
 
     def update_label(self, seconds_left, is_work):
-        self.worked_sekonds = self.amount_sessions * self.work_on_task_time - seconds_left
+        if is_work and seconds_left:
+            self.worked_sekonds += 1
         m = (seconds_left // 60) % 60
         s = seconds_left % 60
         self.lcd_min.display(m)
@@ -86,8 +89,8 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
             cur.execute('''INSERT INTO pomodoro(user, status, work_time, 
-            rest_time, amount_of_sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ?)
-            )''', (self.user_id, 1, self.work_on_task_time, self.rest_time, self.amount_sessions, self.work_on_task_time * self.amount_sessions, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
+            rest_time, amount_of_sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ? AND user = ?)
+            )''', (self.user_id, 1, self.work_on_task_time, self.rest_time, self.amount_sessions, self.work_on_task_time * 60 * self.amount_sessions, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
             con.commit()
 
     def get_inserted_time(self):

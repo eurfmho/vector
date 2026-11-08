@@ -54,7 +54,8 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
 
     def update_label(self, number):
         self.seconds_left = number
-        self.current_seconds = self.total_duration - self.seconds_left
+        if not self.is_ended:
+            self.current_seconds = self.total_duration - self.seconds_left
         if self.seconds_left == 0:
             self.lcd_hours.display(0)
             self.lcd_min.display(0)
@@ -73,11 +74,11 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             if not self.is_ended:
-                cursor.execute('INSERT INTO timer(user, status, time, date,task) VALUES(?, ?,?, ?,(SELECT id FROM tasks WHERE task = ?))', (self.user_id, 1, self.total_duration, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task))
+                cursor.execute('INSERT INTO timer(user, status, time, date,task) VALUES(?, ?,?, ?,(SELECT id FROM tasks WHERE task = ? AND user = ?))', (self.user_id, 1, self.total_duration, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
                 show_custom_message(
                     self, "Достижение", "Вы дошли до конца, молодцы!")
             else:
-                cursor.execute('INSERT INTO timer(user, status, time, task) VALUES(?, ?,?, (SELECT id FROM tasks WHERE task = ?))', (self.user_id, 0, self.current_seconds, self.task))
+                cursor.execute('INSERT INTO timer(user, status, time, date, task) VALUES(?, ?,?, ?, (SELECT id FROM tasks WHERE task = ? AND user = ?))', (self.user_id, 0, self.current_seconds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
                 show_custom_message(
                     self, "Попытка", "Вы попытались, молодцы!")
             conn.commit()
