@@ -2,6 +2,7 @@
 .vscode/
 __pycache__/
 ui/
+.gitignore
 правки.txt
 vector.db
 .DS_Store

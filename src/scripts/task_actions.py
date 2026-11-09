@@ -33,29 +33,12 @@ def save_task(user_id: int, task: list):
             """,
             (user_id, task, user_id, task),
         )
-
-def show_theme_task(parent, user_id: int, list_widget):
+def show_existed_items(parent, user_id, obj):
     tasks = add_items(parent, user_id)
-    
-    selected_items = [item.text() for item in list_widget.selectedItems()]
-    
-    list_widget.clear()
-    list_widget.addItems(tasks)
-    
-    for index in range(list_widget.count()):
-        item = list_widget.item(index)
-        if item.text() in selected_items:
-            item.setSelected(True)
-    save_theme_task(parent)
-
-def save_theme_task(parent):
-    selected_items = [item.text() for item in parent.list_blue_task.selectedItems()]
-    with sqlite3.connect(DB_PATH) as con:
-        con.execute(
-            """UPDATE tasks
-            SET theme = blue
-            WHERE task IN (?)
-        """, tuple(selected_items))
+    current = obj.currentText()
+    obj.clear()
+    obj.addItems(tasks)
+    obj.setCurrentText(current)
 
 def delete_task(parent, task):
     pass

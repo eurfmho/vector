@@ -7,9 +7,10 @@ from src.stopwatch.stopwatch import StopwatchWindow
 from src.exceptions.exceptions import InvalidNameException, EmptyNameSpace
 from src.scripts.custom_messagebox import show_custom_message
 from src.fill_db import full_fill_bd, DB_PATH
+from PyQt6.QtCore import QEvent, QObject
 import sqlite3
 from src.statistics.download_file import export_to_txt
-from src.scripts.task_actions import show_theme_task
+from src.scripts.task_actions import show_existed_items
 from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
 from src.statistics.download_file import export_to_pdf
 
@@ -59,6 +60,9 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         self.setupUi(self)
         setup_charts(self)
         full_fill_bd()
+        self.click_filter = ClickFilter(self)
+        self.combo_blue_task.installEventFilter(self.click_filter)
+        self.combo_basic_task.installEventFilter(self.click_filter)
         self.timer_button.clicked.connect(self.open_timer_window)
         self.stopwatch_button.clicked.connect(self.open_stopwatch_window)
         self.pomodoro_button.clicked.connect(self.open_pomodoro_window)
@@ -69,6 +73,7 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         self.generate_btn.clicked.connect(self.beta_load_data)
         self.download_pdf_btn.clicked.connect(self.beta_export_to_pdf)
         self.download_txt_btn.clicked.connect(self.beta_export_to_txt)
+        self.apply_theme_task_btn.clicked.connect(self.main_show_added)
 
     def open_timer_window(self):
         try:
@@ -155,13 +160,25 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
                     show_custom_message(self, "Ошибка", "создайте аккаунт")
             self.current_user = int(cursor.execute("select id from profiles where name = ?", (perhaps_a_name, )).fetchone()[0])
 
-    def main_show_added_items_basic_version():
-        show_theme_task(self, self.current_user, self.list_basic_task)
+    def main_show_added(self, blue_or_not: int):
+        combo = self.combo_blue_task if blue_or_not else self.combo_basic_task
+        show_existed_items(self, self.current_user, combo)
 
-    def main_show_added_items_blue_version():
-        show_theme_task(self, self.current_user, self.list_blue_task)
-        
 
+class ClickFilter(QObject):
+    def __init__(self, main_window):
+        super().__init__()
+        self.main_window = main_window  
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Type.MouseButtonPress:
+            if obj == self.main_window.combo_blue_task:
+                self.main_window.main_show_added(1)
+            elif obj == self.main_window.combo_basic_task:
+                self.main_window.main_show_added(0)
+        return super().eventFilter(obj, event)
+
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = FirstWindow()
