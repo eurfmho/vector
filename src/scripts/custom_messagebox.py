@@ -21,6 +21,8 @@ def show_custom_message(self, title, text):
                 msg.setIconPixmap(QPixmap(str(path_achivement / "rest_icon.jpg")))
             case "Работа":
                 msg.setIconPixmap(QPixmap(str(path_achivement / "work_icon.jpg")))
+            case "Успех":
+                msg.setIconPixmap(QPixmap(str(path_achivement / "achivement_icon.jpg")))
             
         msg.setStyleSheet("""
             QMessageBox {

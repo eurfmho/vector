@@ -7,7 +7,9 @@ from PyQt6.QtWidgets import QMainWindow
 from ..scripts.get_all_values import get_all_values
 from ..fill_db import DB_PATH
 import sqlite3
+from PyQt6.QtCore import QEvent
 from datetime import datetime as dt
+from ..scripts.task_actions import show_added_items
 
 class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
     def __init__(self, user_id):
@@ -24,7 +26,13 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
         self.is_running = True  
         self.is_started = False
         self.timer_thread = None 
+        self.combo_task.installEventFilter(self)
         self.start_stop.clicked.connect(self.start_session)
+
+    def eventFilter(self, obj, event):
+            if obj == self.combo_task and event.type() == QEvent.Type.MouseButtonPress:
+                show_added_items(self, self.user_id)
+            return super().eventFilter(obj, event)
 
     def start_session(self):
         self.is_running = not self.is_running
@@ -72,3 +80,4 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
             cursor.execute("INSERT INTO stopwatch(user, status, time, date, task) VALUES(?, ?, ?, ?,(SELECT id FROM tasks WHERE task = ? AND user = ?))", (self.user_id, int(self.goal_achieved), self.watch_thread.current_seconds, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
             con.commit()
         self.current_seconds = 0
+        self.combo_task.setEditable(True)

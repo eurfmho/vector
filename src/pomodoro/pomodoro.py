@@ -3,8 +3,9 @@ import sqlite3
 from ..fill_db import DB_PATH
 from ..scripts.custom_messagebox import show_custom_message
 from .thread import PomodoroThread
+from PyQt6.QtCore import QEvent
 from ..scripts.now_time import time
-from ..scripts.add_tasks import add_items, save_task
+from ..scripts.task_actions import add_items, save_task, show_added_items
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
@@ -23,9 +24,15 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
 
         self.is_running = False
         self.pomodoro_thread = None
-        
+
+        self.combo_task.installEventFilter(self)
         self.start_stop.clicked.connect(self.start_or_stop)
 
+    def eventFilter(self, obj, event):
+            if obj == self.combo_task and event.type() == QEvent.Type.MouseButtonPress:
+                show_added_items(self, self.user_id)
+            return super().eventFilter(obj, event)
+    
     def start_or_stop(self):
         if not self.is_running:
             try:
@@ -92,6 +99,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             rest_time, amount_of_sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ? AND user = ?)
             )''', (self.user_id, 1, self.work_on_task_time, self.rest_time, self.amount_sessions, self.work_on_task_time * 60 * self.amount_sessions, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
             con.commit()
+        self.combo_task.setEditable(True)
 
     def get_inserted_time(self):
         try:

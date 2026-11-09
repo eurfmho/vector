@@ -1,14 +1,16 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidget, QAbstractItemView
 from src.pomodoro.pomodoro import PomodoroWindow
 from src.timer.timer import TimerScreen
-from src.first_screen_ui import Ui_hihihi
+from src.first_screen_ui import Ui_basic_theme_task
 from src.stopwatch.stopwatch import StopwatchWindow
 from src.exceptions.exceptions import InvalidNameException, EmptyNameSpace
 from src.scripts.custom_messagebox import show_custom_message
 from src.fill_db import full_fill_bd, DB_PATH
 import sqlite3
+from src.scripts.task_actions import show_theme_task
 from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
+from src.statistics.dwolnload_as_pdf import export_to_pdf
 
 
 BLUE_THEME = """
@@ -35,7 +37,7 @@ BLUE_THEME = """
         background-color: #3d5e8f;
         color: #dae6ef;
     }
-    QLineEdit, QSpinBox, QComboBox {
+    QLineEdit, QSpinBox, QComboBox, QListWidget {
         color: #b5cee1;
         background-color: #3d5e8f;
         border: 1px solid #6181b1;
@@ -50,13 +52,16 @@ BLUE_THEME = """
 """
 
 
-class FirstWindow(QMainWindow, Ui_hihihi):
+class FirstWindow(QMainWindow, Ui_basic_theme_task):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         setup_charts(self)
         full_fill_bd()
-
+        self.list_basic_task.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.list_blue_task.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.list_basic_task.itemClicked.connect(self.main_show_added_items_basic_version)
+        self.list_blue_task.itemClicked.connect(self.main_show_added_items_blue_version)
         self.timer_button.clicked.connect(self.open_timer_window)
         self.stopwatch_button.clicked.connect(self.open_stopwatch_window)
         self.pomodoro_button.clicked.connect(self.open_pomodoro_window)
@@ -65,12 +70,7 @@ class FirstWindow(QMainWindow, Ui_hihihi):
         self.basic_theme.toggled.connect(self.apply_theme)
         self.blue_theme.toggled.connect(self.apply_theme)
         self.generate_btn.clicked.connect(self.beta_load_data)
-
-    def beta_load_data(self):
-        try:
-            load_data(self, self.current_user)
-        except Exception:
-            show_custom_message(self, "Ошибка", "Что-то пошло не так,извините")
+        self.download_btn.clicked.connect(self.beta_export_to_pdf)
 
     def open_timer_window(self):
         try:
@@ -93,6 +93,15 @@ class FirstWindow(QMainWindow, Ui_hihihi):
             self.pomodoro_window.show()
         except Exception:
             show_custom_message(self, 'Ошибка', 'создайте аккаунт или авторизуйтесь')
+
+    def beta_export_to_pdf(self):
+        export_to_pdf(self)
+
+    def beta_load_data(self):
+        try:
+            load_data(self, self.current_user)
+        except Exception:
+            show_custom_message(self, "Ошибка", "Что-то пошло не так,извините")
          
     def create_account(self):
         try:
@@ -146,6 +155,12 @@ class FirstWindow(QMainWindow, Ui_hihihi):
                     show_custom_message(self, "Ошибка", "создайте аккаунт")
             self.current_user = int(cursor.execute("select id from profiles where name = ?", (perhaps_a_name, )).fetchone()[0])
 
+    def main_show_added_items_basic_version():
+        show_theme_task(self, self.current_user, self.list_basic_task)
+
+    def main_show_added_items_blue_version():
+        show_theme_task(self, self.current_user, self.list_blue_task)
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

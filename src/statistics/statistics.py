@@ -2,16 +2,9 @@ import sqlite3
 from ..fill_db import DB_PATH
 from datetime import datetime, timedelta
 from ..scripts.custom_messagebox import show_custom_message
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
-    QPushButton, QComboBox, QMessageBox, QFileDialog
-)
-from PyQt6.QtCore import Qt, QRectF, QDateTime
-from PyQt6.QtGui import QPainter, QPdfWriter, QPageLayout, QPageSize
-from PyQt6.QtCharts import (
-    QChart, QChartView, QPieSeries, QLineSeries, 
-    QDateTimeAxis, QValueAxis, QCategoryAxis
-)
+from PyQt6.QtWidgets import QVBoxLayout
+from PyQt6.QtCore import Qt, QDateTime
+from PyQt6.QtCharts import QChart, QChartView, QPieSeries, QLineSeries, QDateTimeAxis, QValueAxis, QCategoryAxis
 
 
 def setup_charts(parent):
@@ -19,7 +12,8 @@ def setup_charts(parent):
     parent.pie_chart = QChart()
     parent.pie_chart.addSeries(parent.pie_series)
     parent.pie_chart.setTitle("Время по типам счётчиков")
-    QVBoxLayout(parent.tab_pie).addWidget(QChartView(parent.pie_chart))
+    parent.pie_view = QChartView(parent.pie_chart)
+    QVBoxLayout(parent.tab_pie).addWidget(parent.pie_view)
 
     parent.line_series = QLineSeries()
     parent.line_series.setPointsVisible(True)
@@ -33,7 +27,8 @@ def setup_charts(parent):
     parent.line_chart.addAxis(parent.line_axis_y, Qt.AlignmentFlag.AlignLeft)
     parent.line_series.attachAxis(parent.line_axis_x)
     parent.line_series.attachAxis(parent.line_axis_y)
-    QVBoxLayout(parent.tab_line).addWidget(QChartView(parent.line_chart))
+    parent.line_view = QChartView(parent.line_chart)
+    QVBoxLayout(parent.tab_line).addWidget(parent.line_view)
 
 
 def get_date_filter_sql(parent):

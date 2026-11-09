@@ -73,6 +73,7 @@ def full_fill_bd():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user INTEGER NOT NULL,
         task TEXT NOT NULL,
+        theme TEXT NULL,
         FOREIGN KEY (user) REFERENCES profiles(id)
     );
     """
