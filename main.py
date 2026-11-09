@@ -8,9 +8,10 @@ from src.exceptions.exceptions import InvalidNameException, EmptyNameSpace
 from src.scripts.custom_messagebox import show_custom_message
 from src.fill_db import full_fill_bd, DB_PATH
 import sqlite3
+from src.statistics.download_file import export_to_txt
 from src.scripts.task_actions import show_theme_task
 from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
-from src.statistics.dwolnload_as_pdf import export_to_pdf
+from src.statistics.download_file import export_to_pdf
 
 
 BLUE_THEME = """
@@ -58,10 +59,6 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         self.setupUi(self)
         setup_charts(self)
         full_fill_bd()
-        self.list_basic_task.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.list_blue_task.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.list_basic_task.itemClicked.connect(self.main_show_added_items_basic_version)
-        self.list_blue_task.itemClicked.connect(self.main_show_added_items_blue_version)
         self.timer_button.clicked.connect(self.open_timer_window)
         self.stopwatch_button.clicked.connect(self.open_stopwatch_window)
         self.pomodoro_button.clicked.connect(self.open_pomodoro_window)
@@ -70,7 +67,8 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         self.basic_theme.toggled.connect(self.apply_theme)
         self.blue_theme.toggled.connect(self.apply_theme)
         self.generate_btn.clicked.connect(self.beta_load_data)
-        self.download_btn.clicked.connect(self.beta_export_to_pdf)
+        self.download_pdf_btn.clicked.connect(self.beta_export_to_pdf)
+        self.download_txt_btn.clicked.connect(self.beta_export_to_txt)
 
     def open_timer_window(self):
         try:
@@ -86,7 +84,6 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         except Exception:
             show_custom_message(self, 'Ошибка', 'создайте аккаунт или авторизуйтесь')
 
-
     def open_pomodoro_window(self):
         try:
             self.pomodoro_window = PomodoroWindow(self.current_user)
@@ -96,6 +93,9 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
 
     def beta_export_to_pdf(self):
         export_to_pdf(self)
+
+    def beta_export_to_txt(self):
+        export_to_txt(self)
 
     def beta_load_data(self):
         try:

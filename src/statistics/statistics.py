@@ -30,7 +30,6 @@ def setup_charts(parent):
     parent.line_view = QChartView(parent.line_chart)
     QVBoxLayout(parent.tab_line).addWidget(parent.line_view)
 
-
 def get_date_filter_sql(parent):
     period = parent.combo_period_stat.currentText()
     now = datetime.now()
@@ -44,7 +43,6 @@ def get_date_filter_sql(parent):
         start_date = datetime(2000, 1, 1)
     return start_date.strftime("%Y-%m-%d %H:%M:%S")
 
-
 def refresh_task_combo(parent, user_id):
     selected_task = parent.combo_task_stat.currentText()
     with sqlite3.connect(DB_PATH) as con:
@@ -53,14 +51,13 @@ def refresh_task_combo(parent, user_id):
     parent.combo_task_stat.addItems([row[0] for row in rows])
     parent.combo_task_stat.setCurrentText(selected_task)
 
-
 def load_data(parent, user_id):
     refresh_task_combo(parent, user_id)
     update_pie_chart(parent, user_id)
     update_line_chart(parent, user_id)
 
-
-def get_time_statistics(user_id):
+def get_time_statistics(user_id, parent):
+    selected_task = parent.combo_task_stat.currentText()
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -69,7 +66,7 @@ def get_time_statistics(user_id):
     cursor.execute("""
         SELECT status, SUM(time) 
         FROM stopwatch 
-        WHERE user = ? 
+        WHERE user = ?
         GROUP BY status
     """, (user_id,))
     for row in cursor.fetchall():
@@ -88,8 +85,8 @@ def get_time_statistics(user_id):
     cursor.execute("""
         SELECT SUM(time) 
         FROM pomodoro 
-        WHERE user = ?
-    """, (user_id,))
+        WHERE user = ? AND task = ?
+    """, (user_id, selected_task))
     pomodoro_result = cursor.fetchone()[0]
     stats["pomodoro"] = pomodoro_result or 0
 
@@ -130,7 +127,7 @@ def update_pie_chart(parent, user_id):
     parent.pie_series.clear()
 
     try:
-        data = get_time_statistics(user_id)
+        data = get_time_statistics(user_id, parent)
 
         for counter_type, duration in data.items():
             if duration:
@@ -140,7 +137,6 @@ def update_pie_chart(parent, user_id):
     except Exception:
         show_custom_message(parent, "Ошибка", "Ошибка генераци диаграммы,\nубедитесь,что вы запускали программу")
         return
-
 
 def update_line_chart(parent, user_id):
     parent.line_series.clear()
@@ -169,3 +165,5 @@ def update_line_chart(parent, user_id):
     except Exception:
         show_custom_message(parent, "Ошибка", "Произошла ошибка при генерации графика,\nпроверьте наличие сессий приложения")
         return
+
+    
