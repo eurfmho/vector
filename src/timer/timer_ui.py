@@ -79,7 +79,6 @@ class Ui_timer_screen(object):
         self.combo_task = QtWidgets.QComboBox(parent=timer_screen)
         self.combo_task.setGeometry(QtCore.QRect(410, 10, 341, 141))
         self.combo_task.setObjectName("combo_task")
-        self.combo_task.setEditable(True)
 
         self.retranslateUi(timer_screen)
         QtCore.QMetaObject.connectSlotsByName(timer_screen)

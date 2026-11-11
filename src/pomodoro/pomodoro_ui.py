@@ -66,7 +66,6 @@ class Ui_pomodoro(object):
         self.combo_task.setFont(font)
         self.combo_task.setObjectName("combo_task")
         self.verticalLayout.addWidget(self.combo_task)
-        self.combo_task.setEditable(True)
         self.horizontalLayoutWidget = QtWidgets.QWidget(parent=pomodoro)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(19, 199, 761, 421))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")

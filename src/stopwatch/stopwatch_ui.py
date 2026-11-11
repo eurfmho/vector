@@ -76,7 +76,6 @@ class Ui_stopwatch_screen(object):
         self.combo_task = QtWidgets.QComboBox(parent=stopwatch_screen)
         self.combo_task.setGeometry(QtCore.QRect(430, 0, 331, 151))
         self.combo_task.setObjectName("combo_task")
-        self.combo_task.setEditable(True)
 
         self.retranslateUi(stopwatch_screen)
         QtCore.QMetaObject.connectSlotsByName(stopwatch_screen)

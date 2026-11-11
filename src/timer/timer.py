@@ -1,6 +1,6 @@
 from ..scripts.custom_messagebox import show_custom_message
 from .thread import TimerThread
-from ..exceptions.exceptions import InvalidTimeException
+from ..exceptions.exceptions import InvalidTimeException, EmptyDeleteTask
 from ..scripts.now_time import time
 from .timer_ui import Ui_timer_screen
 from PyQt6.QtWidgets import QMainWindow
@@ -10,6 +10,8 @@ from ..scripts.task_actions import show_added_items
 from ..fill_db import DB_PATH
 import sqlite3
 from datetime import datetime as dt
+from PyQt6.QtCore import Qt
+
 
 
 class TimerScreen(QMainWindow, Ui_timer_screen):
@@ -27,11 +29,6 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
         self.is_running = True  
         self.is_started = False
         self.timer_thread = None 
-
-    def eventFilter(self, obj, event):
-        if obj == self.combo_task and event.type() == QEvent.Type.MouseButtonPress:
-            show_added_items(self, self.user_id)
-        return super().eventFilter(obj, event)
 
     def start_or_stop(self):
         self.is_running = not self.is_running
@@ -90,4 +87,3 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
                 show_custom_message(
                     self, "Попытка", "Вы попытались, молодцы!")
             conn.commit()
-        self.combo_task.setEditable(True)

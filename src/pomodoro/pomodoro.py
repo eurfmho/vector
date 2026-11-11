@@ -5,7 +5,7 @@ from ..scripts.custom_messagebox import show_custom_message
 from .thread import PomodoroThread
 from PyQt6.QtCore import QEvent
 from ..scripts.now_time import time
-from ..scripts.task_actions import add_items, save_task, show_added_items
+from ..scripts.task_actions import add_items, show_added_items
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
@@ -16,7 +16,10 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
     def __init__(self, user_id):
         super().__init__()
         self.setupUi(self)
-        self.user_id = user_id
+        try:
+            self.user_id = user_id
+        except:
+            show_custom_message(self, "Ошибка", "создайте аккаунт или авторизуйтесь")
         self.work_on_task_time = 0
         self.rest_time = 0
         self.amount_sessions = 0
@@ -25,13 +28,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
         self.is_running = False
         self.pomodoro_thread = None
 
-        self.combo_task.installEventFilter(self)
         self.start_stop.clicked.connect(self.start_or_stop)
-
-    def eventFilter(self, obj, event):
-            if obj == self.combo_task and event.type() == QEvent.Type.MouseButtonPress:
-                show_added_items(self, self.user_id)
-            return super().eventFilter(obj, event)
     
     def start_or_stop(self):
         if not self.is_running:
@@ -46,7 +43,6 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
 
             self.is_running = True
             self.worked_sekonds = 0
-            save_task(self.user_id, self.task)
             
             self.pomodoro_thread = PomodoroThread(seconds_work, seconds_rest, self.amount_sessions)
             self.pomodoro_thread.tick.connect(self.update_label)
@@ -99,7 +95,6 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             rest_time, amount_of_sessions, time, date, task) VALUES(?, ?, ?, ?, ?, ?, ?, (SELECT id FROM tasks WHERE task = ? AND user = ?)
             )''', (self.user_id, 1, self.work_on_task_time, self.rest_time, self.amount_sessions, self.work_on_task_time * 60 * self.amount_sessions, dt.now().strftime("%Y-%m-%d %H:%M:%S"), self.task, self.user_id))
             con.commit()
-        self.combo_task.setEditable(True)
 
     def get_inserted_time(self):
         try:
@@ -108,7 +103,6 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             self.rest_time = self.rest_time_wg.value()
             self.amount_sessions = self.amount_of_ssessoins_wg.value()
             self.task = self.combo_task.currentText()
-            self.index = self.combo_task.currentIndex()
 
         except Exception:
             raise InvalidInputData
