@@ -11,6 +11,9 @@ def get_all_values(parent):
     parent.task = parent.combo_task.currentText()
     parent.combo_task.setEditable(False)
 
+    if s or m or h:
+        raise InvalidTimeException
+
     if not parent.task:
         raise InvalidTimeException
 

@@ -10,13 +10,12 @@ from src.fill_db import full_fill_bd, DB_PATH
 from PyQt6.QtCore import QEvent, QObject
 import sqlite3
 from src.statistics.download_file import export_to_txt
-from src.scripts.task_actions import show_existed_items
+from src.scripts.task_actions import show_existed_items, check_task_theme
 from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
 from src.statistics.download_file import export_to_pdf
 
 
-BLUE_THEME = """
-    QMainWindow, QDialog {
+BLUE_THEME = """QMainWindow, QDialog {
         background-color: #49648d;
     }
     QLabel {
@@ -50,8 +49,7 @@ BLUE_THEME = """
         color: #93b4cc;
         background-color: #3d5e8f;
         border: 1px solid #6181b1;
-    }
-"""
+    }"""
 
 
 class FirstWindow(QMainWindow, Ui_basic_theme_task):
@@ -74,6 +72,8 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         self.download_pdf_btn.clicked.connect(self.beta_export_to_pdf)
         self.download_txt_btn.clicked.connect(self.beta_export_to_txt)
         self.apply_theme_task_btn.clicked.connect(self.main_show_added)
+        self.apply_theme_task_btn.clicked.connect(self.save_theme_task)
+
 
     def open_timer_window(self):
         try:
@@ -107,7 +107,24 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
             load_data(self, self.current_user)
         except Exception:
             show_custom_message(self, "Ошибка", "Что-то пошло не так,извините")
-         
+
+    def save_theme_task(self):
+        blue_task = self.combo_blue_task.currentText()
+        basic_task = self.combo_basic_task.currentText()
+
+        if blue_task == basic_task:
+            show_custom_message(self, "Ошибка", "Выберите разные задания")
+            return
+        if blue_task == "" or basic_task == "":
+            show_custom_message(self, "Ошибка", "Укажите значение перед тем,как сохранять настройки")
+            return
+        
+        with sqlite3.connect(DB_PATH) as con:
+            cur = con.cursor()
+            cur.execute("UPDATE tasks SET theme = 'blue' WHERE user = ? AND task = ?", (self.current_user, blue_task))
+            cur.execute("UPDATE tasks SET theme = 'basic' WHERE user = ? AND task = ?", (self.current_user, basic_task))
+            con.commit()
+    
     def create_account(self):
         try:
             us = self.username_edit.text()
@@ -166,16 +183,17 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
 
 
 class ClickFilter(QObject):
-    def __init__(self, main_window):
+    def __init__(self, window):
         super().__init__()
-        self.main_window = main_window  
+        self.window = window  
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.MouseButtonPress:
-            if obj == self.main_window.combo_blue_task:
-                self.main_window.main_show_added(1)
-            elif obj == self.main_window.combo_basic_task:
-                self.main_window.main_show_added(0)
+            if obj == self.window.combo_blue_task:
+                self.window.main_show_added(1)
+            elif obj == self.window.combo_basic_task:
+                self.window.main_show_added(0)
+
         return super().eventFilter(obj, event)
 
     
