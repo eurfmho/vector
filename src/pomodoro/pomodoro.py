@@ -5,7 +5,7 @@ from ..scripts.custom_messagebox import show_custom_message
 from .thread import PomodoroThread
 from PyQt6.QtCore import QEvent
 from ..scripts.now_time import time
-from ..scripts.task_actions import add_items, show_added_items
+from ..scripts.task_actions import show_added_items
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
@@ -20,6 +20,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             self.user_id = user_id
         except:
             show_custom_message(self, "Ошибка", "создайте аккаунт или авторизуйтесь")
+        show_added_items(self, self.user_id, self.combo_task)
         self.work_on_task_time = 0
         self.rest_time = 0
         self.amount_sessions = 0
@@ -98,7 +99,6 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
 
     def get_inserted_time(self):
         try:
-            add_items(self, self.user_id)
             self.work_on_task_time = self.work_time_wg.value()
             self.rest_time = self.rest_time_wg.value()
             self.amount_sessions = self.amount_of_ssessoins_wg.value()

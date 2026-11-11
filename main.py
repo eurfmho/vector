@@ -13,8 +13,9 @@ from src.statistics.download_file import export_to_txt
 from src.scripts.task_actions import show_added_items, check_task_theme
 from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
 from src.statistics.download_file import export_to_pdf
+import time
 
-
+DELETE_CODE = 16777219
 BLUE_THEME = """QMainWindow, QDialog {
         background-color: #49648d;
     }
@@ -60,21 +61,24 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
         full_fill_bd()
         self.click_filter = ClickFilter(self)
         self.list_tasks.installEventFilter(self.click_filter)
+        self.combo_blue_task.installEventFilter(self.click_filter)
+        self.combo_basic_task.installEventFilter(self.click_filter)
         self.timer_button.clicked.connect(self.open_timer_window)
         self.stopwatch_button.clicked.connect(self.open_stopwatch_window)
         self.pomodoro_button.clicked.connect(self.open_pomodoro_window)
         self.create_account_btn.clicked.connect(self.create_account)
+        self.create_account_btn.clicked.connect(self.revial_tasks)
         self.basic_theme.setChecked(True)
         self.basic_theme.toggled.connect(self.apply_theme)
         self.blue_theme.toggled.connect(self.apply_theme)
         self.generate_btn.clicked.connect(self.beta_load_data)
         self.download_pdf_btn.clicked.connect(self.beta_export_to_pdf)
         self.download_txt_btn.clicked.connect(self.beta_export_to_txt)
-        self.apply_theme_task_btn.clicked.connect(self.main_show_added)
         self.apply_theme_task_btn.clicked.connect(self.save_theme_task)
+        self.btn_add_task.clicked.connect(self.add_items)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_Delete:
+        if event.key() == DELETE_CODE:
             self.delete_task()
         if event.key() == Qt.Key.Key_1:
             self.tab_3.setCurrentIndex(0)
@@ -86,29 +90,38 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
     def add_items(self):
         task, ok = QInputDialog.getText(self, "Новое задание", "Введите название:")
         if ok and task:
-            self.list_tasks.addItem(task)
+            self.list_tasks.addItem(str(task))
+            task = str(task)
 
+            with sqlite3.connect(DB_PATH) as con:
+                cur = con.cursor()
+                try:
+                    cur.execute("""
+                                    INSERT INTO tasks(user, task)
+                                    SELECT ?, ?
+                                    WHERE NOT EXISTS (
+                                        SELECT 1 FROM tasks WHERE user = ? AND task = ?
+                                    );
+                                    """, (self.current_user, task, self.current_user, task))
+                    con.commit()
+                except Exception:
+                    show_custom_message(self, "Ошибка", "Войдите в аккаунт или создайте его")
+        else:
+            show_custom_message(self, "Ошибка", "Введите не пустоту пж")
+
+    def revial_tasks(self):
+        time.sleep(1)
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
-            try:
-                cur.execute("""
-                                INSERT INTO tasks(user, task)
-                                SELECT ?, ?
-                                WHERE NOT EXISTS (
-                                    SELECT 1 FROM tasks WHERE user = ? AND task = ?
-                                );
-                                """, (self.current_user, task, self.current_user, task))
-                con.commit()
-            except Exception:
-                show_custom_message(self, "Ошибка", "Войдите в аккаунт или создайте его")
+            tasks = cur.execute("SELECT task FROM tasks WHERE user = ?", (self.current_user,)).fetchall()
+            for t in tasks:
+                self.list_tasks.addItem(str(t[0]))
 
     def delete_task(self):
         task = self.list_tasks.currentItem()
-        if not task:
-            show_custom_message(self, "Ошибка", "Не пытайтесь удалить пустоту")
-            if task:
-                row = self.list_tasks.row(task)
-                self.list_tasks.takeItem(row)
+        row = self.list_tasks.row(task)
+        self.list_tasks.takeItem(row)
+        task = str(task)
 
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
@@ -232,12 +245,16 @@ class ClickFilter(QObject):
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.MouseButtonPress:
-            if obj == self.window.list_tasks:
-                self.window.add_items()               
+            if obj == self.window.combo_blue_task:
+                self.window.main_show_added(1)
+            if obj == self.window.combo_basic_task:
+                self.window.main_show_added(0)
 
+            return True
+            
         return super().eventFilter(obj, event)
 
-    
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = FirstWindow()

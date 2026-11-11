@@ -21,15 +21,15 @@ def show_added_items(parent, user_id: int, obj):
     obj.addItems(tasks)
     obj.setCurrentText(current)
 
-def check_task_theme(parent, user_id, task):
+def check_task_theme(user_id, task):
     app = QApplication.instance()
     with sqlite3.connect(DB_PATH) as con:
         cur = con.cursor()
-        task_theme = str(cur.execute("SELECT theme FROM tasks WHERE user = ? AND task = ?", (user_id, task)).fetchone())
+        task_theme = str(cur.execute("SELECT theme FROM tasks WHERE user = ? AND task = ?", (user_id, task)).fetchone()[0])
         if task_theme == "blue":
             app.setStyleSheet(BLUE_THEME)
         else:
-            app.setStyleSheet()
+            app.setStyleSheet('')
 
 BLUE_THEME = """QMainWindow, QDialog {
         background-color: #49648d;

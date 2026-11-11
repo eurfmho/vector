@@ -4,14 +4,11 @@ from ..exceptions.exceptions import InvalidTimeException, EmptyDeleteTask
 from ..scripts.now_time import time
 from .timer_ui import Ui_timer_screen
 from PyQt6.QtWidgets import QMainWindow
-from PyQt6.QtCore import QEvent
 from ..scripts.get_all_values import get_all_values
 from ..scripts.task_actions import show_added_items
 from ..fill_db import DB_PATH
 import sqlite3
 from datetime import datetime as dt
-from PyQt6.QtCore import Qt
-
 
 
 class TimerScreen(QMainWindow, Ui_timer_screen):
@@ -20,7 +17,7 @@ class TimerScreen(QMainWindow, Ui_timer_screen):
         self.setupUi(self)
         self.user_id = user_id
         self.start_stop.clicked.connect(self.start_or_stop)
-        self.combo_task.installEventFilter(self)
+        show_added_items(self, self.user_id, self.combo_task)
         self.seconds_left = 0
         self.current_seconds = 0  
         self.task = str()

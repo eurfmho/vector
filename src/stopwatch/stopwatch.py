@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import QMainWindow
 from ..scripts.get_all_values import get_all_values
 from ..fill_db import DB_PATH
 import sqlite3
-from PyQt6.QtCore import QEvent
 from datetime import datetime as dt
 from ..scripts.task_actions import show_added_items
 
@@ -19,6 +18,7 @@ class StopwatchWindow(QMainWindow, Ui_stopwatch_screen):
             self.user_id = user_id
         except:
             show_custom_message(self, "Ошибка", "создайте аккаунт или авторизуйтесь")
+        show_added_items(self, self.user_id, self.combo_task)
         self.current_seconds = 0 
         self.seconds_left = 0
         self.task = str()
