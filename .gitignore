@@ -5,6 +5,6 @@ ui/
 build/
 dist/
 .gitignore
-правки.txt
 vector.db
 .DS_Store
+main.spec
