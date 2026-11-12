@@ -1,0 +1,35 @@
+QMainWindow, QDialog {
+        background-color: #49648d;
+    }
+    QLabel {
+        color: #dae6ef;
+    }
+    QRadioButton {
+        color: #7998cc;
+    }
+    QPushButton {
+        color: #dae6ef;
+        background-color: #3d5e8f;
+        border: 1px solid #6181b1;
+        border-radius: 4px;
+        padding: 5px;
+    }
+    QPushButton:hover {
+        background-color: #3d5e8f;
+    }
+    QMessageBox {
+        background-color: #3d5e8f;
+        color: #dae6ef;
+    }
+    QLineEdit, QSpinBox, QComboBox, QListWidget {
+        color: #b5cee1;
+        background-color: #3d5e8f;
+        border: 1px solid #6181b1;
+        border-radius: 3px;
+        padding: 2px;
+    }
+    QLCDNumber {
+        color: #93b4cc;
+        background-color: #3d5e8f;
+        border: 1px solid #6181b1;
+    }

@@ -2,6 +2,8 @@
 .vscode/
 __pycache__/
 ui/
+build/
+dist/
 .gitignore
 правки.txt
 vector.db

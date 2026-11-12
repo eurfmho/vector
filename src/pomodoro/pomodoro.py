@@ -5,7 +5,7 @@ from ..scripts.custom_messagebox import show_custom_message
 from .thread import PomodoroThread
 from PyQt6.QtCore import QEvent
 from ..scripts.now_time import time
-from ..scripts.task_actions import show_added_items
+from ..scripts.task_actions import show_added_items, check_task_theme
 from .pomodoro_ui import Ui_pomodoro
 from ..exceptions.exceptions import InvalidInputData
 from PyQt6.QtWidgets import QMainWindow
@@ -103,6 +103,7 @@ class PomodoroWindow(QMainWindow, Ui_pomodoro):
             self.rest_time = self.rest_time_wg.value()
             self.amount_sessions = self.amount_of_ssessoins_wg.value()
             self.task = self.combo_task.currentText()
+            check_task_theme(self.user_id, self.task)
 
         except Exception:
             raise InvalidInputData

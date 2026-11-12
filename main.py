@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QInputDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QInputDialog
 from src.pomodoro.pomodoro import PomodoroWindow
 from src.timer.timer import TimerScreen
 from src.first_screen_ui import Ui_basic_theme_task
@@ -10,47 +10,15 @@ from src.fill_db import full_fill_bd, DB_PATH
 from PyQt6.QtCore import QEvent, QObject, Qt
 import sqlite3
 from src.statistics.download_file import export_to_txt
-from src.scripts.task_actions import show_added_items, check_task_theme
+from src.scripts.task_actions import show_added_items
 from src.statistics.statistics import load_data, refresh_task_combo, setup_charts
 from src.statistics.download_file import export_to_pdf
 import time
 
 DELETE_CODE = 16777219
-BLUE_THEME = """QMainWindow, QDialog {
-        background-color: #49648d;
-    }
-    QLabel {
-        color: #dae6ef;
-    }
-    QRadioButton {
-        color: #7998cc;
-    }
-    QPushButton {
-        color: #dae6ef;
-        background-color: #3d5e8f;
-        border: 1px solid #6181b1;
-        border-radius: 4px;
-        padding: 5px;
-    }
-    QPushButton:hover {
-        background-color: #3d5e8f;
-    }
-    QMessageBox {
-        background-color: #3d5e8f;
-        color: #dae6ef;
-    }
-    QLineEdit, QSpinBox, QComboBox, QListWidget {
-        color: #b5cee1;
-        background-color: #3d5e8f;
-        border: 1px solid #6181b1;
-        border-radius: 3px;
-        padding: 2px;
-    }
-    QLCDNumber {
-        color: #93b4cc;
-        background-color: #3d5e8f;
-        border: 1px solid #6181b1;
-    }"""
+
+with open("src/blue_theme.txt", mode="r", encoding="utf-8") as file:
+    BLUE_THEME = file.read().strip("\n")
 
 
 class FirstWindow(QMainWindow, Ui_basic_theme_task):
@@ -89,33 +57,45 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
 
     def add_items(self):
         task, ok = QInputDialog.getText(self, "Новое задание", "Введите название:")
-        if ok and task:
-            self.list_tasks.addItem(str(task))
-            task = str(task)
+        all_items = []
+        for index in range(self.list_tasks.count()):
+            item = self.list_tasks.item(index)
+            all_items.append(item.text())
+        if ok and task.strip():
+            if task not in all_items:
+                self.list_tasks.addItem(task)
 
-            with sqlite3.connect(DB_PATH) as con:
-                cur = con.cursor()
-                try:
-                    cur.execute("""
-                                    INSERT INTO tasks(user, task)
-                                    SELECT ?, ?
-                                    WHERE NOT EXISTS (
-                                        SELECT 1 FROM tasks WHERE user = ? AND task = ?
-                                    );
-                                    """, (self.current_user, task, self.current_user, task))
-                    con.commit()
-                except Exception:
-                    show_custom_message(self, "Ошибка", "Войдите в аккаунт или создайте его")
-        else:
-            show_custom_message(self, "Ошибка", "Введите не пустоту пж")
+                with sqlite3.connect(DB_PATH) as con:
+                    cur = con.cursor()
+                    try:
+                        cur.execute("""
+                                        INSERT INTO tasks(user, task)
+                                        SELECT ?, ?
+                                        WHERE NOT EXISTS (
+                                            SELECT 1 FROM tasks WHERE user = ? AND task = ?
+                                        );
+                                        """, (self.current_user, task, self.current_user, task))
+                        con.commit()
+                    except Exception:
+                        show_custom_message(self, "Ошибка", "Войдите в аккаунт или создайте его")
+            else:
+                show_custom_message(self, "Ошибка", "Задание уже существует")
+                return
 
     def revial_tasks(self):
+        all_items = []
+        for index in range(self.list_tasks.count()):
+            item = self.list_tasks.item(index)
+            all_items.append(item.text())
         time.sleep(1)
         with sqlite3.connect(DB_PATH) as con:
             cur = con.cursor()
             tasks = cur.execute("SELECT task FROM tasks WHERE user = ?", (self.current_user,)).fetchall()
             for t in tasks:
-                self.list_tasks.addItem(str(t[0]))
+                if str(t[0]) not in all_items:
+                    self.list_tasks.addItem(str(t[0]))
+                else:
+                    show_custom_message(self, "Ошибка", "Все задания уже проявлены")
 
     def delete_task(self):
         task = self.list_tasks.currentItem()
@@ -180,11 +160,11 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
             cur.execute("UPDATE tasks SET theme = 'blue' WHERE user = ? AND task = ?", (self.current_user, blue_task))
             cur.execute("UPDATE tasks SET theme = 'basic' WHERE user = ? AND task = ?", (self.current_user, basic_task))
             con.commit()
-    
+        show_custom_message(self, "Успех", "Темы успшно сохранены")
+        
     def create_account(self):
         try:
             us = self.username_edit.text()
-            
             if not us.strip():  
                 raise EmptyNameSpace
             if len(us) >= 10:
@@ -195,9 +175,9 @@ class FirstWindow(QMainWindow, Ui_basic_theme_task):
             refresh_task_combo(self, self.current_user)
             
         except InvalidNameException:
-            QMessageBox.critical(self, 'Ошибка', 'Имя слишком длинное!')
+            show_custom_message(self, 'Ошибка', 'Имя слишком длинное!')
         except EmptyNameSpace:
-            QMessageBox.critical(self, 'Ошибка', 'Сначала введите имя!')
+            show_custom_message(self, 'Ошибка', 'Сначала введите имя!')
 
     def apply_theme(self):
         app = QApplication.instance()

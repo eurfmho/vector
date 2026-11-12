@@ -18,6 +18,5 @@ class EmptyNameSpace(Vector):
     pass
 
 
-
 class EmptyDeleteTask(Vector):
     pass    
