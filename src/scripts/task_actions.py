@@ -2,6 +2,7 @@ import sqlite3
 from ..fill_db import DB_PATH
 from .custom_messagebox import show_custom_message
 from PyQt6.QtWidgets import QApplication
+from pathlib import Path
 
 
 def add_items(parent, user_id: int):
@@ -31,6 +32,8 @@ def check_task_theme(user_id, task):
         else:
             app.setStyleSheet('')
 
-with open("../blue_theme.txt", mode="r", encoding="utf-8") as file:
-    BLUE_THEME = file.read().strip("\n")    
+  
+theme_path = Path(__file__).resolve().parent.parent / "blue_theme.txt"
 
+with open(theme_path, mode="r", encoding="utf-8") as file:
+    BLUE_THEME = file.read().strip("\n")

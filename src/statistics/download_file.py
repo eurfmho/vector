@@ -1,5 +1,4 @@
 import sqlite3
-import traceback
 from PyQt6.QtGui import QPainter, QPdfWriter, QPageLayout, QPageSize
 from PyQt6.QtCore import Qt, QMarginsF
 from PyQt6.QtWidgets import QFileDialog
